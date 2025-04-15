@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Milk Tea - Kurimi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="icon" href="logo.jpg"/>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #8d66bb;
+    }
+    .menu-item {
+      margin-bottom: 30px;
+    }
+    .card-img {
+      position: relative;
+    }
+    .quantity {
+      width: 60px;
+      margin: auto;
+    }
+    .back-btn {
+      margin-top: 30px;
+    }
+    .jumbotron {
+      background-color: #6f4f1f;
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+      margin-bottom: 30px;
+    }
+    #order-summary {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">Kurimi Milk Tea</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="case study.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="menu.html">Milk Tea</a></li>
+          <li class="nav-item"><a class="nav-link" href="Snacks.html">Snacks</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+          <li class="nav-item"><button class="btn btn-outline-light ms-3" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Modal -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="loginModalLabel">Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="username" class="form-control mb-3" placeholder="Enter username">
+          <input type="password" id="password" class="form-control mb-3" placeholder="Enter password">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="login()">Login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jumbotron -->
+  <div class="jumbotron">
+    <h1>Order Your Favorite Milk Tea</h1>
+    <p>Cool, creamy, and handcrafted for your cravings!</p>
+  </div>
+
+  <!-- Menu Section -->
+  <div class="container">
+    <h2 class="text-center mb-4">Choose Your Favorite Drink</h2>
+    <div class="row" id="menu-items"></div>
+
+    <!-- Order Summary -->
+    <div id="order-summary" class="mt-5">
+      <h4>Order Summary</h4>
+      <ul id="order-list" class="list-group mb-3"></ul>
+      <p><strong>Total:</strong> ₱<span id="order-total">0</span></p>
+      <button class="btn btn-success" onclick="submitOrder()">Submit Order</button>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div class="text-center back-btn">
+    <a href="case study.html" class="btn btn-secondary">← Back to Home</a>
+  </div>
+
+  <!-- Bootstrap & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const drinks = [
+      { name: "Classic Milk Tea", desc: "A Sweet and Creamy Classic!", price: 170, img: "milktea.jpg" },
+      { name: "Okinawa", desc: "Brown Sugar Milk Tea with pearls", price: 170, img: "okinawa.jpg" },
+      { name: "Matcha", desc: "For the Matcha lovers", price: 170, img: "matcha.jpg" },
+      { name: "Taro Cream Cheese w/ Pearl", desc: "Creamy and delicious", price: 170, img: "taro.jpg" },
+      { name: "Strawberry", desc: "Strawberry with creamcheese", price: 170, img: "strawberry.jpg" },
+      { name: "Cheesecake", desc: "Swirl of Cheesecake Milk Tea", price: 170, img: "cheesecake.jpg" },
+    ];
+
+    let isLoggedIn = false;
+    let total = 0;
+
+    const menuContainer = document.getElementById('menu-items');
+    const orderList = document.getElementById('order-list');
+    const orderTotal = document.getElementById('order-total');
+
+    drinks.forEach((drink, index) => {
+      const col = document.createElement('div');
+      col.className = 'col-md-4 menu-item';
+      col.innerHTML = `
+        <div class="card text-white">
+          <div class="card-img" style="background-image: url('${drink.img}'); background-size: cover; background-position: center; height: 350px;">
+            <div class="card-img-overlay d-flex flex-column justify-content-end text-center" style="background: rgba(0,0,0,0.4);">
+              <h5 class="card-title">${drink.name}</h5>
+              <p class="card-text">${drink.desc}</p>
+              <p class="card-text fw-bold">₱${drink.price}</p>
+              <input type="number" id="qty-${index}" class="form-control quantity mb-2" value="1" min="1">
+              <button class="btn btn-success" onclick="addToOrder(${index})">Add to Order</button>
+            </div>
+          </div>
+        </div>
+      `;
+      menuContainer.appendChild(col);
+    });
+
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user && pass) {
+        isLoggedIn = true;
+        alert('Login successful!');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        modal.hide();
+      } else {
+        alert('Please enter username and password.');
+      }
+    }
+
+    function addToOrder(index) {
+      if (!isLoggedIn) {
+        alert("Please login before placing an order.");
+        return;
+      }
+      const qty = parseInt(document.getElementById(`qty-${index}`).value);
+      if (qty < 1) return;
+
+      const item = drinks[index];
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      li.textContent = `${item.name} x${qty}`;
+      const priceSpan = document.createElement('span');
+      const itemTotal = item.price * qty;
+      priceSpan.textContent = `₱${itemTotal}`;
+      li.appendChild(priceSpan);
+      orderList.appendChild(li);
+
+      total += itemTotal;
+      orderTotal.textContent = total;
+    }
+
+    function submitOrder() {
+      if (!isLoggedIn) {
+        alert("You must login first to submit an order.");
+        return;
+      }
+      if (orderList.children.length === 0) {
+        alert("No items in your order.");
+        return;
+      }
+      alert("Order submitted successfully! Thank you!");
+      orderList.innerHTML = "";
+      orderTotal.textContent = "0";
+      total = 0;
+    }
+  </script>
+</body>
+</html>
+
